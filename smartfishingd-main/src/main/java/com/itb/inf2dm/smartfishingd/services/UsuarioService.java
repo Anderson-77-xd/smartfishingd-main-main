@@ -1,14 +1,19 @@
 package com.itb.inf2dm.smartfishingd.services;
-import com.itb.inf2dm.smartfishingd.model.entity.Usuario;
-import com.itb.inf2dm.smartfishingd.repository.UsuarioRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.itb.inf2dm.smartfishingd.model.entity.Usuario;
+import com.itb.inf2dm.smartfishingd.repository.UsuarioRepository;
 @Service
 
 public class UsuarioService {
     @Autowired
+private BCryptPasswordEncoder passwordEncoder;
+
+@Autowired
     private UsuarioRepository usuarioRepository;
 
     public List<Usuario> findAll() {
@@ -16,14 +21,15 @@ public class UsuarioService {
     }
 
     public Usuario save(Usuario usuario) {
-        return usuarioRepository.save(usuario);
-    }
+    usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+    return usuarioRepository.save(usuario);
+}
 
     public Usuario update(Long id, Usuario usuario) {
         Usuario usuarioExistente = findById(id);
         usuarioExistente.setNome(usuario.getNome());
         usuarioExistente.setEmail(usuario.getEmail());
-        usuarioExistente.setSenha(usuario.getSenha());
+        usuarioExistente.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuarioExistente.setId(id);
         usuarioExistente.setFoto(usuario.getFoto());
         usuarioExistente.setNivelAcesso(usuario.getNivelAcesso());
