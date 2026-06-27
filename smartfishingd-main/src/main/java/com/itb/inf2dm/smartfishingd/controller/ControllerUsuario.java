@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/v1/usuario")
@@ -29,6 +30,43 @@ public class ControllerUsuario {
     public ResponseEntity<Usuario> salvarUsuario(@RequestBody Usuario usuario) {
         Usuario novoUsuario = usuarioService.save(usuario);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@RequestBody Map<String, String> credenciais) {
+        try {
+            String email = credenciais.get("email");
+            String senha = credenciais.get("senha");
+
+            if (email == null || senha == null) {
+                return ResponseEntity.badRequest().body(
+                        Map.of(
+                                "status", 400,
+                                "error", "Bad Request",
+                                "message", "Informe email e senha"
+                        )
+                );
+            }
+
+            Usuario usuario = usuarioService.login(email, senha);
+            Map<String, Object> resposta = new HashMap<>();
+            resposta.put("id", usuario.getId());
+            resposta.put("nome", usuario.getNome());
+            resposta.put("email", usuario.getEmail());
+            resposta.put("nivelAcesso", usuario.getNivelAcesso());
+            resposta.put("statusUsuario", usuario.getStatusUsuario());
+            resposta.put("dataCadastro", usuario.getDataCadastro());
+
+            return ResponseEntity.ok(resposta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of(
+                            "status", 401,
+                            "error", "Unauthorized",
+                            "message", "Email ou senha invalidos"
+                    )
+            );
+        }
     }
 
     @GetMapping("/{id}")

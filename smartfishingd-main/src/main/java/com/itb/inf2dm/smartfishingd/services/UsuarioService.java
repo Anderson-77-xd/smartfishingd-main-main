@@ -25,6 +25,17 @@ private BCryptPasswordEncoder passwordEncoder;
     return usuarioRepository.save(usuario);
 }
 
+    public Usuario login(String email, String senha) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+
+        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
+            throw new RuntimeException("Senha invalida");
+        }
+
+        return usuario;
+    }
+
     public Usuario update(Long id, Usuario usuario) {
         Usuario usuarioExistente = findById(id);
         usuarioExistente.setNome(usuario.getNome());
